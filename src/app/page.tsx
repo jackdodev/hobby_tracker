@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { cookies } from 'next/headers'
 import {
   getActiveHobbies,
   getActiveRoutines,
@@ -35,20 +36,23 @@ function isHobbyDone(hobby: Hobby, entry: LogEntry | undefined): boolean {
 }
 
 export default async function TodayPage() {
+  const jar = await cookies()
+  const userId = jar.get('userId')?.value ?? ''
+
   const today = todayString()
-  const allHobbies = await getActiveHobbies()
-  const routines = await getActiveRoutines()
-  const entries = await getLogEntriesForDate(today)
+  const allHobbies = await getActiveHobbies(userId)
+  const routines = await getActiveRoutines(userId)
+  const entries = await getLogEntriesForDate(userId, today)
   const entryMap = new Map(entries.map((e) => [e.hobbyId, e]))
 
   const routineHobbyIds = new Set(routines.flatMap((r) => r.hobbyIds))
   const standaloneHobbies = allHobbies.filter((h) => !routineHobbyIds.has(h.id))
 
   const hobbyStreaks: Record<string, StreakInfo> = Object.fromEntries(
-    await Promise.all(allHobbies.map(async (h) => [h.id, await computeStreak(h.id, today)]))
+    await Promise.all(allHobbies.map(async (h) => [h.id, await computeStreak(userId, h.id, today)]))
   )
   const routineStreaks: Record<string, StreakInfo> = Object.fromEntries(
-    await Promise.all(routines.map(async (r) => [r.id, await computeRoutineStreak(r, today)]))
+    await Promise.all(routines.map(async (r) => [r.id, await computeRoutineStreak(userId, r, today)]))
   )
 
   const formatted = new Date().toLocaleDateString('en-US', {

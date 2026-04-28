@@ -77,8 +77,25 @@
 - [x] Update `src/lib/storage.ts` — all functions async, `fs` replaced with `kv.get`/`kv.set`
 - [x] All pages marked `force-dynamic`; all server actions updated with `await`
 - [x] Unit tests updated to mock `@vercel/kv` instead of `fs` — 25/25 passing
-- [ ] Smoke test production deployment on Vercel
+- [x] Smoke test production deployment on Vercel — all 4 pages return 200 locally with KV connected
 - Note: local dev requires `vercel env pull .env.local` to get `KV_REST_API_URL` + `KV_REST_API_TOKEN`
+
+## Milestone 5: User Authentication ✓
+
+> No real security — credentials are never validated or stored. The userId is purely a namespace key for KV data. Anyone who enters a userId gets access to that user's data.
+
+- [x] `src/middleware.ts` — redirect unauthenticated users (no `userId` cookie) to `/login`; redirect logged-in users away from `/login` and `/signup`
+- [x] `src/actions/auth.ts` — `login(formData)`: set `userId` cookie + redirect to `/`; `signup()`: redirect to `/login` (no storage); `logout()`: clear cookie + redirect to `/login`
+- [x] Login page (`src/app/(auth)/login/page.tsx`) — form with userId + password fields, "Sign Up" link to `/signup`; uses minimal layout without nav
+- [x] Sign up page (`src/app/(auth)/signup/page.tsx`) — form with userId + password fields; submit redirects to `/login`; same minimal layout
+- [x] `src/app/(auth)/layout.tsx` — minimal layout (no nav) for auth pages
+- [x] Update `storage.ts` — add `userId` to all function signatures; KV key becomes `tracker:${userId}` instead of `tracker`
+- [x] Update all server actions (`hobbies.ts`, `log.ts`, `routines.ts`) — read `userId` cookie with `cookies()`, pass to storage functions
+- [x] Update all pages (`/`, `/hobbies`, `/history`, `/stats`) — read `userId` cookie, pass to storage functions
+- [x] Add logout button to `Nav` — form action calls `logout` server action; shows current userId
+
+## Known Issues
+- [ ] E2E tests reset `data/tracker.json` before each test — needs updating to reset the KV store instead (after Milestone 4 migration)
 
 ## Future Ideas
 - [ ] Year selector on Stats page (currently hardcoded to last 52 weeks)

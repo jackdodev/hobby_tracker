@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers'
 import { getHobbies, getLogEntriesForMonth } from '@/lib/storage'
 import MonthNav from './components/MonthNav'
 import type { Hobby } from '@/types'
@@ -20,8 +21,11 @@ export default async function HistoryPage({ searchParams }: Props) {
   const days = daysInMonth(year, mon)
   const dayNumbers = Array.from({ length: days }, (_, i) => i + 1)
 
-  const hobbies = await getHobbies()
-  const entries = await getLogEntriesForMonth(currentMonth)
+  const jar = await cookies()
+  const userId = jar.get('userId')?.value ?? ''
+
+  const hobbies = await getHobbies(userId)
+  const entries = await getLogEntriesForMonth(userId, currentMonth)
   const entryMap = new Map(entries.map((e) => [`${e.hobbyId}:${e.date}`, e]))
 
   const active = hobbies.filter((h) => h.removedAt === null)

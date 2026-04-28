@@ -17,7 +17,7 @@ A personal daily hobby tracker — a simple web app to log and review hobby acti
 - **Language**: TypeScript
 - **UI Library**: React 19
 - **Styling**: Tailwind CSS 4
-- **Storage**: Local JSON file (`data/tracker.json`)
+- **Storage**: Vercel KV (Upstash Redis) via `@vercel/kv`
 - **Unit Testing**: Vitest + React Testing Library
 - **E2E Testing**: Playwright
 - **Deployment**: Vercel
@@ -315,8 +315,9 @@ Push to main
 ```
 
 **Notes**
-- No environment variables needed for this initial version
-- `data/tracker.json` is read/written at runtime via the local filesystem — this works in local dev but **Vercel's filesystem is read-only**. For a future version, migrate storage to a database or Vercel KV.
+- Storage uses Vercel KV (Upstash). Env vars `hb_KV_REST_API_URL` and `hb_KV_REST_API_TOKEN` are required at runtime.
+- For local dev, run `vercel env pull .env.local` once to pull credentials from the Vercel project.
+- The `hb_` prefix on env vars comes from the KV store's name in the Vercel dashboard — `storage.ts` uses `createClient` with those exact names.
 
 ## Pre-commit actions
 
@@ -331,8 +332,6 @@ Push to main
 
 ### File Structure
 ```
-data/
-└── tracker.json          # All persistent data
 src/
 ├── app/                  # App Router pages and layouts
 │   └── .../
@@ -340,9 +339,10 @@ src/
 ├── components/           # Shared components
 ├── actions/              # Server Actions
 ├── lib/
-│   ├── storage.ts        # All file read/write logic
+│   ├── storage.ts        # All KV read/write logic (async)
 │   └── presets.ts        # Static HOBBY_PRESETS list
 └── types/                # Shared TypeScript types
+e2e/                      # Playwright E2E tests
 ```
 
 ### TypeScript
@@ -368,6 +368,16 @@ src/
 - Extract repeated class combinations into components, not `@apply`
 
 ## Test Plan
+
+### Unit Tests (Vitest)
+- `src/lib/storage.test.ts` — 25 tests covering all storage functions
+- Mock: `@vercel/kv` is mocked with an in-memory store (`kv.get` returns `store`, `kv.set` writes to `store`)
+- Run: `npm test`
+
+### E2E Tests (Playwright)
+- `e2e/hobby.spec.ts` — 2 tests: add→check→verify history, add→remove→verify gone
+- Currently resets `data/tracker.json` before each test — needs updating to reset KV store after Milestone 4 migration
+- Run: `npm run test:e2e` (requires `sudo npx playwright install-deps` once per machine)
 
 ## Critical Conventions
 

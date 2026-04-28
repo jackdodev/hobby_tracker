@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { cookies } from 'next/headers'
 import { getDailyCountMap, getActiveHobbies } from '@/lib/storage'
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -19,8 +20,11 @@ function cellColor(count: number, total: number): string {
 }
 
 export default async function StatsPage() {
-  const dailyMap = await getDailyCountMap()
-  const totalHobbies = (await getActiveHobbies()).length
+  const jar = await cookies()
+  const userId = jar.get('userId')?.value ?? ''
+
+  const dailyMap = await getDailyCountMap(userId)
+  const totalHobbies = (await getActiveHobbies(userId)).length
 
   // Build a 52-week grid ending today
   const today = new Date()

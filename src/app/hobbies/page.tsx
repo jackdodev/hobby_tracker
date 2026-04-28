@@ -1,5 +1,6 @@
 export const dynamic = 'force-dynamic'
 
+import { cookies } from 'next/headers'
 import { getActiveHobbies, getActiveRoutines } from '@/lib/storage'
 import AddHobbyModal from './components/AddHobbyModal'
 import AddRoutineModal from './components/AddRoutineModal'
@@ -8,8 +9,11 @@ import RoutineRow from './components/RoutineRow'
 import type { Hobby } from '@/types'
 
 export default async function HobbiesPage() {
-  const allHobbies = await getActiveHobbies()
-  const routines = await getActiveRoutines()
+  const jar = await cookies()
+  const userId = jar.get('userId')?.value ?? ''
+
+  const allHobbies = await getActiveHobbies(userId)
+  const routines = await getActiveRoutines(userId)
 
   const routineHobbyIds = new Set(routines.flatMap((r) => r.hobbyIds))
   const standaloneHobbies = allHobbies.filter((h) => !routineHobbyIds.has(h.id))

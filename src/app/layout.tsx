@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Geist } from 'next/font/google'
+import { cookies } from 'next/headers'
 import './globals.css'
 import Nav from '@/components/Nav'
 
@@ -10,11 +11,14 @@ export const metadata: Metadata = {
   description: 'Track your daily hobby achievements',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const jar = await cookies()
+  const userId = jar.get('userId')?.value ?? ''
+
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-white text-gray-900">
-        <Nav />
+        {userId && <Nav userId={userId} />}
         <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
           {children}
         </main>

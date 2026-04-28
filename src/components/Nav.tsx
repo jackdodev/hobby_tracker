@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { logout } from '@/actions/auth'
 
 const LINKS = [
   { href: '/', label: 'Today' },
@@ -10,12 +11,14 @@ const LINKS = [
   { href: '/stats', label: 'Stats' },
 ]
 
-export default function Nav() {
+type Props = { userId: string }
+
+export default function Nav({ userId }: Props) {
   const pathname = usePathname()
 
   return (
     <nav className="border-b border-gray-200 bg-white">
-      <div className="max-w-3xl mx-auto px-4 py-3 flex gap-6">
+      <div className="max-w-3xl mx-auto px-4 py-3 flex items-center gap-6">
         {LINKS.map(({ href, label }) => (
           <Link
             key={href}
@@ -29,6 +32,18 @@ export default function Nav() {
             {label}
           </Link>
         ))}
+
+        <div className="ml-auto flex items-center gap-3">
+          <span className="text-xs text-gray-400">{userId}</span>
+          <form action={logout}>
+            <button
+              type="submit"
+              className="text-xs text-gray-500 hover:text-red-500 transition-colors"
+            >
+              Log out
+            </button>
+          </form>
+        </div>
       </div>
     </nav>
   )
