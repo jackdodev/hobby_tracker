@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import {
   getActiveHobbies,
   getActiveRoutines,
@@ -32,15 +34,22 @@ function isHobbyDone(hobby: Hobby, entry: LogEntry | undefined): boolean {
   return (entry.value ?? 0) >= (hobby.goal?.target ?? 1)
 }
 
-export default function TodayPage() {
+export default async function TodayPage() {
   const today = todayString()
-  const allHobbies = getActiveHobbies()
-  const routines = getActiveRoutines()
-  const entries = getLogEntriesForDate(today)
+  const allHobbies = await getActiveHobbies()
+  const routines = await getActiveRoutines()
+  const entries = await getLogEntriesForDate(today)
   const entryMap = new Map(entries.map((e) => [e.hobbyId, e]))
 
   const routineHobbyIds = new Set(routines.flatMap((r) => r.hobbyIds))
   const standaloneHobbies = allHobbies.filter((h) => !routineHobbyIds.has(h.id))
+
+  const hobbyStreaks: Record<string, StreakInfo> = Object.fromEntries(
+    await Promise.all(allHobbies.map(async (h) => [h.id, await computeStreak(h.id, today)]))
+  )
+  const routineStreaks: Record<string, StreakInfo> = Object.fromEntries(
+    await Promise.all(routines.map(async (r) => [r.id, await computeRoutineStreak(r, today)]))
+  )
 
   const formatted = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -81,7 +90,7 @@ export default function TodayPage() {
         <ul className="flex flex-col gap-2">
           {standaloneHobbies.map((hobby) => (
             <li key={hobby.id}>
-              {renderHobby(hobby, entryMap.get(hobby.id), today, computeStreak(hobby.id, today))}
+              {renderHobby(hobby, entryMap.get(hobby.id), today, hobbyStreaks[hobby.id] ?? { current: 0, best: 0 })}
             </li>
           ))}
 
@@ -90,7 +99,7 @@ export default function TodayPage() {
               .map((id) => allHobbies.find((h) => h.id === id))
               .filter((h): h is Hobby => h !== undefined)
             const streaks: Record<string, StreakInfo> = Object.fromEntries(
-              rHobbies.map((h) => [h.id, computeStreak(h.id, today)])
+              rHobbies.map((h) => [h.id, hobbyStreaks[h.id] ?? { current: 0, best: 0 }])
             )
             return (
               <li key={routine.id}>
@@ -100,7 +109,7 @@ export default function TodayPage() {
                   entries={entries}
                   today={today}
                   streaks={streaks}
-                  routineStreak={computeRoutineStreak(routine, today)}
+                  routineStreak={routineStreaks[routine.id] ?? { current: 0, best: 0 }}
                 />
               </li>
             )

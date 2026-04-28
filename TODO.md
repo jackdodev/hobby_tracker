@@ -73,10 +73,12 @@
 - Note: E2E tests require system browser deps — run `sudo npx playwright install-deps` once on a new machine before `npm run test:e2e`
 
 ## Milestone 4: Storage Migration (for Vercel deployment)
-- [ ] Migrate from `data/tracker.json` to a persistent store (Vercel KV or Supabase)
-- [ ] Update `src/lib/storage.ts` to use the new backend
-- [ ] Add environment variables and document in CLAUDE.md
+- [x] Migrate from `data/tracker.json` to Vercel KV (Upstash)
+- [x] Update `src/lib/storage.ts` — all functions async, `fs` replaced with `kv.get`/`kv.set`
+- [x] All pages marked `force-dynamic`; all server actions updated with `await`
+- [x] Unit tests updated to mock `@vercel/kv` instead of `fs` — 25/25 passing
 - [ ] Smoke test production deployment on Vercel
+- Note: local dev requires `vercel env pull .env.local` to get `KV_REST_API_URL` + `KV_REST_API_TOKEN`
 
 ## Future Ideas
 - [ ] Year selector on Stats page (currently hardcoded to last 52 weeks)

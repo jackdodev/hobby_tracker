@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getActiveHobbies, getActiveRoutines } from '@/lib/storage'
 import AddHobbyModal from './components/AddHobbyModal'
 import AddRoutineModal from './components/AddRoutineModal'
@@ -5,9 +7,9 @@ import HobbyRow from './components/HobbyRow'
 import RoutineRow from './components/RoutineRow'
 import type { Hobby } from '@/types'
 
-export default function HobbiesPage() {
-  const allHobbies = getActiveHobbies()
-  const routines = getActiveRoutines()
+export default async function HobbiesPage() {
+  const allHobbies = await getActiveHobbies()
+  const routines = await getActiveRoutines()
 
   const routineHobbyIds = new Set(routines.flatMap((r) => r.hobbyIds))
   const standaloneHobbies = allHobbies.filter((h) => !routineHobbyIds.has(h.id))

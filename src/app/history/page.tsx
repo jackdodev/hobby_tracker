@@ -20,8 +20,8 @@ export default async function HistoryPage({ searchParams }: Props) {
   const days = daysInMonth(year, mon)
   const dayNumbers = Array.from({ length: days }, (_, i) => i + 1)
 
-  const hobbies = getHobbies()
-  const entries = getLogEntriesForMonth(currentMonth)
+  const hobbies = await getHobbies()
+  const entries = await getLogEntriesForMonth(currentMonth)
   const entryMap = new Map(entries.map((e) => [`${e.hobbyId}:${e.date}`, e]))
 
   const active = hobbies.filter((h) => h.removedAt === null)

@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import { getDailyCountMap, getActiveHobbies } from '@/lib/storage'
 
 const DAY_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -16,9 +18,9 @@ function cellColor(count: number, total: number): string {
   return 'bg-green-700'
 }
 
-export default function StatsPage() {
-  const dailyMap = getDailyCountMap()
-  const totalHobbies = getActiveHobbies().length
+export default async function StatsPage() {
+  const dailyMap = await getDailyCountMap()
+  const totalHobbies = (await getActiveHobbies()).length
 
   // Build a 52-week grid ending today
   const today = new Date()

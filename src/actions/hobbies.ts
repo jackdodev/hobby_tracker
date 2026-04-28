@@ -10,20 +10,20 @@ export async function createHobby(params: {
   goal?: HobbyGoal
 }): Promise<void> {
   if (!params.name.trim()) return
-  addHobby(params.name, params.type, params.goal)
+  await addHobby(params.name, params.type, params.goal)
   revalidatePath('/')
   revalidatePath('/hobbies')
   revalidatePath('/history')
 }
 
 export async function editHobbyGoal(id: string, goal: { target: number; unit: string }): Promise<void> {
-  updateHobbyGoal(id, goal)
+  await updateHobbyGoal(id, goal)
   revalidatePath('/')
   revalidatePath('/hobbies')
 }
 
 export async function deleteHobby(id: string): Promise<void> {
-  removeHobby(id)
+  await removeHobby(id)
   revalidatePath('/')
   revalidatePath('/hobbies')
   revalidatePath('/history')
