@@ -1,0 +1,13 @@
+{
+  "hobbies": [
+    {
+      "id": "0335b937-9ae0-4af9-b250-b6fed1959df9",
+      "name": "Running",
+      "createdAt": "2026-04-27T04:57:46.658Z",
+      "removedAt": "2026-04-27T04:57:46.753Z",
+      "type": "boolean"
+    }
+  ],
+  "routines": [],
+  "logEntries": []
+}

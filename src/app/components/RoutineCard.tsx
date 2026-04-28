@@ -1,0 +1,89 @@
+'use client'
+
+import { useState } from 'react'
+import ToggleButton, { StreakBadge } from '@/app/components/ToggleButton'
+import CounterInput from '@/app/components/CounterInput'
+import QuantityInput from '@/app/components/QuantityInput'
+import TimeInput from '@/app/components/TimeInput'
+import type { Hobby, LogEntry, Routine, StreakInfo } from '@/types'
+
+type Props = {
+  routine: Routine
+  hobbies: Hobby[]
+  entries: LogEntry[]
+  today: string
+  streaks: Record<string, StreakInfo>
+  routineStreak: StreakInfo
+}
+
+function isHobbyDone(hobby: Hobby, entry: LogEntry | undefined): boolean {
+  if (!entry) return false
+  if (hobby.type === 'boolean') return true
+  return (entry.value ?? 0) >= (hobby.goal?.target ?? 1)
+}
+
+function HobbyItem({
+  hobby,
+  entry,
+  today,
+  streak,
+}: {
+  hobby: Hobby
+  entry: LogEntry | undefined
+  today: string
+  streak: StreakInfo
+}) {
+  if (hobby.type === 'counter' && hobby.goal)
+    return <CounterInput hobbyId={hobby.id} hobbyName={hobby.name} date={today} value={entry?.value ?? 0} goal={hobby.goal} streak={streak} />
+  if (hobby.type === 'quantity' && hobby.goal)
+    return <QuantityInput hobbyId={hobby.id} hobbyName={hobby.name} date={today} value={entry?.value ?? 0} goal={hobby.goal} streak={streak} />
+  if (hobby.type === 'time' && hobby.goal)
+    return <TimeInput hobbyId={hobby.id} hobbyName={hobby.name} date={today} value={entry?.value ?? 0} goal={hobby.goal} streak={streak} />
+  return <ToggleButton hobbyId={hobby.id} hobbyName={hobby.name} date={today} checked={!!entry} streak={streak} />
+}
+
+export default function RoutineCard({ routine, hobbies, entries, today, streaks, routineStreak }: Props) {
+  const [expanded, setExpanded] = useState(false)
+  const entryMap = new Map(entries.map((e) => [e.hobbyId, e]))
+
+  const doneCount = hobbies.filter((h) => isHobbyDone(h, entryMap.get(h.id))).length
+  const allDone = hobbies.length > 0 && doneCount === hobbies.length
+
+  return (
+    <div className={`rounded-lg border overflow-hidden ${allDone ? 'border-green-300' : 'border-gray-200'}`}>
+      <div
+        onClick={() => setExpanded((v) => !v)}
+        className={`flex items-center gap-3 px-4 py-3 cursor-pointer select-none ${
+          allDone ? 'bg-green-50' : 'bg-white hover:bg-gray-50'
+        }`}
+      >
+        <span className={`font-medium flex-1 ${allDone ? 'text-green-800' : 'text-gray-700'}`}>
+          {routine.name}
+        </span>
+        <span className="text-sm text-gray-500 shrink-0">{doneCount} / {hobbies.length}</span>
+        <StreakBadge streak={routineStreak} />
+        <span className={`text-xs ml-1 shrink-0 ${allDone ? 'text-green-500' : 'text-gray-400'}`}>
+          {expanded ? '▲' : '▼'}
+        </span>
+      </div>
+
+      {expanded && (
+        <div className="border-t border-gray-100 bg-gray-50 p-2 flex flex-col gap-2">
+          {hobbies.length === 0 ? (
+            <p className="text-sm text-gray-400 px-2 py-1">No active hobbies in this routine.</p>
+          ) : (
+            hobbies.map((hobby) => (
+              <HobbyItem
+                key={hobby.id}
+                hobby={hobby}
+                entry={entryMap.get(hobby.id)}
+                today={today}
+                streak={streaks[hobby.id] ?? { current: 0, best: 0 }}
+              />
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
