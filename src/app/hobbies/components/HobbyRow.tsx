@@ -13,10 +13,10 @@ const TYPE_LABEL: Record<HobbyType, string> = {
 }
 
 const TYPE_COLOR: Record<HobbyType, string> = {
-  boolean: 'bg-gray-100 text-gray-600',
-  counter: 'bg-blue-100 text-blue-700',
+  boolean: 'bg-slate-100 text-slate-600',
+  counter: 'bg-indigo-100 text-indigo-700',
   quantity: 'bg-cyan-100 text-cyan-700',
-  time: 'bg-purple-100 text-purple-700',
+  time: 'bg-violet-100 text-violet-700',
 }
 
 export default function HobbyRow({ hobby }: { hobby: Hobby }) {
@@ -36,15 +36,15 @@ export default function HobbyRow({ hobby }: { hobby: Hobby }) {
   }
 
   return (
-    <li className={`flex flex-col divide-y divide-gray-100 bg-white ${isPending ? 'opacity-50' : ''}`}>
+    <li className={`flex flex-col bg-white ${isPending ? 'opacity-50' : ''}`}>
       <div
         onClick={() => editable && setEditing((v) => !v)}
         className={`flex items-center justify-between px-4 py-3 ${
-          editable ? 'cursor-pointer hover:bg-gray-50' : ''
-        } ${editing ? 'bg-gray-50' : ''}`}
+          editable ? 'cursor-pointer hover:bg-slate-50' : ''
+        } ${editing ? 'bg-slate-50' : ''}`}
       >
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="font-medium">{hobby.name}</span>
+          <span className="font-medium text-sm text-slate-800">{hobby.name}</span>
           <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${TYPE_COLOR[hobby.type]}`}>
             {TYPE_LABEL[hobby.type]}
             {hobby.goal ? ` · ${hobby.goal.target} ${hobby.goal.unit}` : ''}
@@ -58,7 +58,7 @@ export default function HobbyRow({ hobby }: { hobby: Hobby }) {
       {editing && (
         <form
           onSubmit={handleSubmit}
-          className="flex items-center gap-2 px-4 py-3 bg-gray-50"
+          className="flex items-center gap-2 px-4 py-3 bg-slate-50 border-t border-slate-100"
         >
           <input
             name="target"
@@ -67,26 +67,27 @@ export default function HobbyRow({ hobby }: { hobby: Hobby }) {
             required
             defaultValue={hobby.goal?.target}
             placeholder="Target"
-            className="w-28 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            autoFocus
+            className="w-28 border border-slate-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <input
             name="unit"
             required
             defaultValue={hobby.goal?.unit}
             placeholder="Unit"
-            className="w-28 border border-gray-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-28 border border-slate-300 rounded-xl px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
           <button
             type="submit"
             disabled={isPending}
-            className="px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-3 py-1.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
             Save
           </button>
           <button
             type="button"
             onClick={() => setEditing(false)}
-            className="px-3 py-1.5 text-sm text-gray-500 hover:text-gray-700"
+            className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 transition-colors"
           >
             Cancel
           </button>

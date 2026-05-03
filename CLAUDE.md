@@ -231,6 +231,72 @@ Fri  [█]  [░]  [ ]  [ ]  ...  [░]
 - Gives a long-term consistency view at a glance
 - Color scale is relative to total active hobbies at time of rendering (removed hobbies excluded from denominator)
 
+## UI Design System
+
+### Principles
+
+1. **Mobile-first responsive** — bottom tab navigation on mobile (`< md`), top nav on desktop (`md+`). All touch targets `min-h-[44px]`. Full-width on mobile, `max-w-2xl` centered on desktop.
+2. **Easy to use** — primary actions clearly visible; one-tap logging; confirmations only for destructive actions; no hidden gestures.
+3. **Neat and simple** — generous whitespace, minimal visual noise, max 2 accent colors per screen. Prefer icons alongside text for quick scanning.
+4. **Coherent** — shared design tokens (colors, radius, spacing) used consistently across all pages and components. Every card looks like it belongs to the same system.
+5. **Creative** — personality through thoughtful details: smooth transitions on done states, engaging empty states, subtle visual feedback on interaction.
+
+### Color Palette
+
+| Role | Tailwind tokens | Usage |
+|------|----------------|-------|
+| Primary / CTA | `indigo-500`, `indigo-600` | Buttons, active nav, focus rings |
+| Success | `emerald-500`, `emerald-600` | Completed items, streaks, progress fill |
+| Warning | `amber-500` | Partial completion |
+| Destructive | `rose-500`, `rose-600` | Remove / delete actions |
+| Neutral base | `slate-50` → `slate-900` | Page bg, text, borders, secondary |
+| Card background | `white` | All card surfaces |
+
+**Hobby type badges:**
+- `boolean` → `slate-100 / slate-600`
+- `counter` → `indigo-100 / indigo-700`
+- `quantity` → `cyan-100 / cyan-700`
+- `time` → `violet-100 / violet-700`
+
+### Typography
+
+| Role | Classes |
+|------|---------|
+| Page title | `text-2xl font-bold text-slate-900` |
+| Section label | `text-xs font-semibold text-slate-400 uppercase tracking-widest` |
+| Hobby name | `text-sm font-medium text-slate-800` |
+| Meta / secondary | `text-xs text-slate-500` |
+| Badge text | `text-xs font-medium` |
+
+### Spacing & Shape
+
+- **Page padding**: `px-4 py-6` (mobile) / `px-0 py-8` (desktop, content fills max-w)
+- **Card radius**: `rounded-2xl`
+- **Badge / pill**: `rounded-full`
+- **Gap between cards**: `gap-3`
+- **Card inner padding**: `px-4 py-3`
+- **Shadow**: `shadow-sm` on cards (not borders-only)
+
+### Responsive Strategy
+
+- Breakpoint split: `md` (≥ 768 px) separates mobile from desktop
+- **Navigation**:
+  - Mobile: `fixed bottom-0` tab bar with icon + label for each route; body has `pb-20` to avoid overlap
+  - Desktop (`md+`): horizontal top nav bar (current pattern, refined)
+- **Modals**:
+  - Mobile: slide-up bottom sheet (`fixed bottom-0 rounded-t-3xl w-full`)
+  - Desktop (`md+`): centered overlay modal (current pattern)
+- **Content width**: `w-full max-w-2xl mx-auto` on all pages
+
+### Nav Icons
+
+| Route | Icon (Heroicons outline) |
+|-------|--------------------------|
+| Today (`/`) | `HomeIcon` |
+| Hobbies (`/hobbies`) | `ListBulletIcon` |
+| History (`/history`) | `CalendarDaysIcon` |
+| Stats (`/stats`) | `ChartBarIcon` |
+
 ## Data Storage
 
 All data is stored in a single JSON file at `data/tracker.json`.

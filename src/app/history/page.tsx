@@ -45,60 +45,74 @@ export default async function HistoryPage({ searchParams }: Props) {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">History</h1>
-      <p className="text-gray-500 mb-4">Monthly overview of your hobby achievements.</p>
+      <h1 className="text-2xl font-bold text-slate-900 mb-0.5">History</h1>
+      <p className="text-slate-400 text-sm mb-5">Monthly overview of your hobby achievements.</p>
 
       <MonthNav current={currentMonth} />
 
       {hobbies.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-gray-500 mb-2">No hobbies to show history for.</p>
-          <a href="/hobbies" className="text-blue-500 text-sm underline">Add some hobbies</a>
+          <div className="text-4xl mb-3">📅</div>
+          <p className="text-slate-500 text-sm mb-2">No hobbies to show history for.</p>
+          <a href="/hobbies" className="text-indigo-500 text-sm font-medium hover:text-indigo-700 transition-colors">
+            Add some hobbies
+          </a>
         </div>
       ) : (
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto rounded-2xl border border-slate-200 shadow-sm bg-white">
           <table className="text-sm border-collapse w-full">
             <thead>
-              <tr>
-                <th className="text-left py-2 pr-4 font-medium text-gray-600 sticky left-0 bg-white min-w-[120px]">
+              <tr className="border-b border-slate-100">
+                <th className="text-left py-3 px-4 font-semibold text-slate-600 sticky left-0 bg-white min-w-[120px] z-10">
                   Hobby
                 </th>
                 {dayNumbers.map((d) => (
-                  <th key={d} className="w-7 text-center font-normal text-gray-400 pb-2">
+                  <th key={d} className="w-7 text-center font-normal text-slate-400 py-3 text-xs">
                     {d}
                   </th>
                 ))}
-                <th className="pl-3 text-right font-medium text-gray-600 pb-2 min-w-[48px]">%</th>
+                <th className="pl-3 pr-4 text-right font-semibold text-slate-600 py-3 min-w-[48px]">%</th>
               </tr>
             </thead>
             <tbody>
               {active.map((hobby) => (
-                <tr key={hobby.id} className="border-t border-gray-100">
-                  <td className="py-2 pr-4 font-medium sticky left-0 bg-white">{hobby.name}</td>
+                <tr key={hobby.id} className="border-t border-slate-100 hover:bg-slate-50/60 transition-colors">
+                  <td className="py-2.5 px-4 font-medium text-slate-700 text-sm sticky left-0 bg-white z-10">
+                    {hobby.name}
+                  </td>
                   {dayNumbers.map((d) => {
                     const status = cellStatus(hobby, d)
                     return (
-                      <td key={d} className="text-center py-2">
-                        {status === 'full' && <span className="text-green-500 text-base">✓</span>}
-                        {status === 'partial' && <span className="text-orange-400 text-base">●</span>}
+                      <td key={d} className="text-center py-2.5">
+                        {status === 'full' && (
+                          <span className="inline-flex items-center justify-center w-5 h-5 bg-emerald-100 rounded-md text-emerald-600 text-xs font-bold">
+                            ✓
+                          </span>
+                        )}
+                        {status === 'partial' && (
+                          <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-100 text-amber-500 text-[10px]">
+                            ●
+                          </span>
+                        )}
                       </td>
                     )
                   })}
-                  <td className="pl-3 text-right py-2 font-medium text-green-600">
+                  <td className="pl-3 pr-4 text-right py-2.5 font-semibold text-emerald-600 text-sm tabular-nums">
                     {completionPct(hobby)}
                   </td>
                 </tr>
               ))}
-
             </tbody>
           </table>
 
-          <div className="flex items-center gap-4 mt-4 text-xs text-gray-400">
+          <div className="flex items-center gap-4 px-4 py-3 border-t border-slate-100 text-xs text-slate-400">
             <span className="flex items-center gap-1.5">
-              <span className="text-green-500">✓</span> Fully achieved
+              <span className="inline-flex items-center justify-center w-4 h-4 bg-emerald-100 rounded text-emerald-600 text-[10px] font-bold">✓</span>
+              Fully achieved
             </span>
             <span className="flex items-center gap-1.5">
-              <span className="text-orange-400">●</span> Partially achieved
+              <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-full bg-amber-100 text-amber-500 text-[9px]">●</span>
+              Partially achieved
             </span>
           </div>
         </div>

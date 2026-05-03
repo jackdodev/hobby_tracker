@@ -72,58 +72,61 @@ export default function AddRoutineModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 border border-blue-600 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50"
+        className="px-4 py-2.5 border border-indigo-500 text-indigo-600 text-sm font-medium rounded-xl hover:bg-indigo-50 transition-colors"
       >
         + Add Routine
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 pt-16 px-4"
+          className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-start md:justify-center md:pt-16 md:px-4"
           onClick={(e) => e.target === e.currentTarget && close()}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-xl w-full md:max-w-lg p-6 max-h-[90vh] md:max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-semibold">Create a Routine</h2>
-              <button onClick={close} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+              <h2 className="text-lg font-semibold text-slate-900">Create a Routine</h2>
+              <button
+                onClick={close}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors text-sm font-bold"
+              >
                 ✕
               </button>
             </div>
 
             <div className="mb-5">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
                 Routine Name
               </p>
               <input
                 value={routineName}
                 onChange={(e) => setRoutineName(e.target.value)}
                 placeholder="e.g. Morning Routine"
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
               />
             </div>
 
             {pendingHobbies.length > 0 && (
               <div className="mb-5">
-                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-2">
                   Added Hobbies
                 </p>
-                <ul className="flex flex-col gap-1">
+                <ul className="flex flex-col gap-1.5">
                   {pendingHobbies.map((h, i) => (
                     <li
                       key={i}
-                      className="flex items-center justify-between px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg text-sm"
+                      className="flex items-center justify-between px-3 py-2 bg-indigo-50 border border-indigo-200 rounded-xl text-sm"
                     >
-                      <span className="font-medium text-blue-800">{h.name}</span>
+                      <span className="font-medium text-indigo-800">{h.name}</span>
                       <div className="flex items-center gap-2">
                         {h.goal && (
-                          <span className="text-xs text-blue-500">
+                          <span className="text-xs text-indigo-400 tabular-nums">
                             {h.goal.target} {h.goal.unit}
                           </span>
                         )}
                         <button
                           type="button"
                           onClick={() => setPendingHobbies((prev) => prev.filter((_, j) => j !== i))}
-                          className="text-blue-400 hover:text-red-500 leading-none"
+                          className="w-5 h-5 flex items-center justify-center rounded-full text-indigo-400 hover:text-rose-500 hover:bg-rose-50 transition-colors text-xs font-bold"
                         >
                           ✕
                         </button>
@@ -134,10 +137,10 @@ export default function AddRoutineModal() {
               </div>
             )}
 
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
               Popular habits
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-5">
+            <div className="grid grid-cols-3 gap-2 mb-5">
               {HOBBY_PRESETS.map((p) => {
                 const isSelected = selectedPreset?.name === p.name
                 return (
@@ -146,21 +149,21 @@ export default function AddRoutineModal() {
                     type="button"
                     onClick={() => handlePresetClick(p)}
                     disabled={isPending}
-                    className={`flex flex-col items-center gap-1 p-3 border rounded-xl text-sm transition-colors disabled:opacity-50 ${
+                    className={`flex flex-col items-center gap-1 p-3 border rounded-2xl text-sm transition-colors disabled:opacity-50 ${
                       isSelected
-                        ? 'border-blue-400 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:bg-gray-50'
+                        ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
+                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
                     }`}
                   >
                     <span className="text-2xl">{p.emoji}</span>
-                    <span className="text-center leading-tight">{p.name}</span>
+                    <span className="text-center leading-tight text-xs font-medium">{p.name}</span>
                   </button>
                 )
               })}
             </div>
 
-            <div className="border-t pt-5">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+            <div className="border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
                 {selectedPreset ? `Customize: ${selectedPreset.name}` : 'Custom hobby'}
               </p>
               <form onSubmit={handleAddToRoutine} className="flex flex-col gap-3">
@@ -169,12 +172,12 @@ export default function AddRoutineModal() {
                   placeholder="Hobby name"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
                 <select
                   value={customType}
                   onChange={(e) => { setCustomType(e.target.value as HobbyType); setSelectedPreset(null) }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
                 >
                   <option value="boolean">Done / Not done</option>
                   <option value="counter">Counter (e.g. pages read)</option>
@@ -187,24 +190,24 @@ export default function AddRoutineModal() {
                       type="number"
                       min="1"
                       required
-                      placeholder="Daily goal (number)"
+                      placeholder="Daily goal"
                       value={formTarget}
                       onChange={(e) => setFormTarget(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
                     <input
                       required
-                      placeholder={customType === 'time' ? 'min' : 'unit (e.g. ml)'}
+                      placeholder={customType === 'time' ? 'min' : 'unit'}
                       value={formUnit}
                       onChange={(e) => setFormUnit(e.target.value)}
-                      className="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-24 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
                   </div>
                 )}
                 <button
                   type="submit"
                   disabled={isPending || !formName.trim()}
-                  className="px-4 py-2 border border-blue-600 text-blue-600 text-sm font-medium rounded-lg hover:bg-blue-50 disabled:opacity-50"
+                  className="px-4 py-2.5 border border-indigo-500 text-indigo-600 text-sm font-medium rounded-xl hover:bg-indigo-50 disabled:opacity-50 transition-colors"
                 >
                   + Add to Routine
                 </button>
@@ -214,7 +217,7 @@ export default function AddRoutineModal() {
             <button
               onClick={handleCreateRoutine}
               disabled={isPending || !routineName.trim() || pendingHobbies.length === 0}
-              className="mt-5 w-full px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              className="mt-5 w-full px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
             >
               {isPending ? 'Creating…' : `Create Routine${pendingHobbies.length > 0 ? ` (${pendingHobbies.length})` : ''}`}
             </button>

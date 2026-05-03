@@ -20,25 +20,31 @@ export default async function HobbiesPage() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">Manage Hobbies</h1>
-      <p className="text-gray-500 mb-6">Add or remove the hobbies you want to track daily.</p>
+      <h1 className="text-2xl font-bold text-slate-900 mb-0.5">Manage Hobbies</h1>
+      <p className="text-slate-400 text-sm mb-6">Add or remove the hobbies you want to track daily.</p>
 
       {standaloneHobbies.length === 0 && routines.length === 0 ? (
-        <p className="text-gray-400 text-sm py-2">No hobbies yet. Add one below to get started.</p>
+        <div className="text-center py-12">
+          <div className="text-4xl mb-3">📝</div>
+          <p className="text-slate-500 text-sm">No hobbies yet. Add one below to get started.</p>
+        </div>
       ) : (
         <>
           {standaloneHobbies.length > 0 && (
-            <ul className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden mb-6">
-              {standaloneHobbies.map((hobby) => (
-                <HobbyRow key={hobby.id} hobby={hobby} />
-              ))}
-            </ul>
+            <div className="mb-6">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Hobbies</h2>
+              <ul className="flex flex-col divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white">
+                {standaloneHobbies.map((hobby) => (
+                  <HobbyRow key={hobby.id} hobby={hobby} />
+                ))}
+              </ul>
+            </div>
           )}
 
           {routines.length > 0 && (
             <div className="mb-6">
-              <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-2">Routines</h2>
-              <ul className="flex flex-col divide-y divide-gray-100 border border-gray-200 rounded-lg overflow-hidden">
+              <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Routines</h2>
+              <ul className="flex flex-col divide-y divide-slate-100 border border-slate-200 rounded-2xl overflow-hidden shadow-sm bg-white">
                 {routines.map((routine) => {
                   const rHobbies = routine.hobbyIds
                     .map((id) => allHobbies.find((h) => h.id === id))
@@ -51,7 +57,7 @@ export default async function HobbiesPage() {
         </>
       )}
 
-      <div className="flex gap-3 flex-wrap mt-6">
+      <div className="flex gap-3 flex-wrap">
         <AddHobbyModal />
         <AddRoutineModal />
       </div>

@@ -10,17 +10,17 @@ export default function RemoveButton({ id }: { id: string }) {
   if (confirming) {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-gray-500">Remove?</span>
+        <span className="text-sm text-slate-500">Remove?</span>
         <button
           onClick={() => startTransition(() => deleteHobby(id))}
           disabled={isPending}
-          className="text-sm font-medium text-red-600 hover:text-red-800 disabled:opacity-50"
+          className="text-sm font-medium text-rose-600 hover:text-rose-800 disabled:opacity-50 transition-colors"
         >
           Yes
         </button>
         <button
           onClick={() => setConfirming(false)}
-          className="text-sm text-gray-400 hover:text-gray-600"
+          className="text-sm text-slate-400 hover:text-slate-600 transition-colors"
         >
           No
         </button>
@@ -31,7 +31,7 @@ export default function RemoveButton({ id }: { id: string }) {
   return (
     <button
       onClick={() => setConfirming(true)}
-      className="text-sm text-red-500 hover:text-red-700"
+      className="text-sm text-rose-500 hover:text-rose-700 transition-colors"
     >
       Remove
     </button>

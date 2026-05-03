@@ -9,7 +9,6 @@ export default function AddHobbyModal() {
   const [open, setOpen] = useState(false)
   const [isPending, startTransition] = useTransition()
 
-  // Controlled form state
   const [selectedPreset, setSelectedPreset] = useState<HobbyPreset | null>(null)
   const [formName, setFormName] = useState('')
   const [customType, setCustomType] = useState<HobbyType>('boolean')
@@ -31,7 +30,6 @@ export default function AddHobbyModal() {
 
   function handlePresetClick(preset: HobbyPreset) {
     if (preset.type === 'boolean') {
-      // Boolean presets add immediately — no config needed
       startTransition(async () => {
         await createHobby({ name: preset.name, type: preset.type })
         close()
@@ -40,10 +38,8 @@ export default function AddHobbyModal() {
     }
 
     if (selectedPreset?.name === preset.name) {
-      // Clicking the active preset cancels the selection
       resetForm()
     } else {
-      // Pre-fill the custom form with this preset's values
       setSelectedPreset(preset)
       setFormName(preset.name)
       setCustomType(preset.type)
@@ -70,28 +66,31 @@ export default function AddHobbyModal() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+        className="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors shadow-sm"
       >
         + Add hobby
       </button>
 
       {open && (
         <div
-          className="fixed inset-0 bg-black/40 flex items-start justify-center z-50 pt-16 px-4"
+          className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-start md:justify-center md:pt-16 md:px-4"
           onClick={(e) => e.target === e.currentTarget && close()}
         >
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-6 max-h-[80vh] overflow-y-auto">
+          <div className="bg-white rounded-t-3xl md:rounded-2xl shadow-xl w-full md:max-w-lg p-6 max-h-[90vh] md:max-h-[80vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-5">
-              <h2 className="text-lg font-semibold">Add a hobby</h2>
-              <button onClick={close} className="text-gray-400 hover:text-gray-600 text-xl leading-none">
+              <h2 className="text-lg font-semibold text-slate-900">Add a hobby</h2>
+              <button
+                onClick={close}
+                className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors text-sm font-bold"
+              >
                 ✕
               </button>
             </div>
 
-            <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
               Popular habits
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
+            <div className="grid grid-cols-3 gap-2 mb-6">
               {HOBBY_PRESETS.map((p) => {
                 const isSelected = selectedPreset?.name === p.name
                 return (
@@ -99,21 +98,21 @@ export default function AddHobbyModal() {
                     key={p.name}
                     onClick={() => handlePresetClick(p)}
                     disabled={isPending}
-                    className={`flex flex-col items-center gap-1 p-3 border rounded-xl text-sm transition-colors disabled:opacity-50 ${
+                    className={`flex flex-col items-center gap-1 p-3 border rounded-2xl text-sm transition-colors disabled:opacity-50 ${
                       isSelected
-                        ? 'border-blue-400 bg-blue-50 text-blue-700'
-                        : 'border-gray-200 hover:bg-gray-50'
+                        ? 'border-indigo-400 bg-indigo-50 text-indigo-700'
+                        : 'border-slate-200 bg-white hover:bg-slate-50 text-slate-700'
                     }`}
                   >
                     <span className="text-2xl">{p.emoji}</span>
-                    <span className="text-center leading-tight">{p.name}</span>
+                    <span className="text-center leading-tight text-xs font-medium">{p.name}</span>
                   </button>
                 )
               })}
             </div>
 
-            <div className="border-t pt-5">
-              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+            <div className="border-t border-slate-100 pt-5">
+              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
                 {selectedPreset ? `Customize: ${selectedPreset.name}` : 'Custom hobby'}
               </p>
               <form onSubmit={handleCustomSubmit} className="flex flex-col gap-3">
@@ -123,7 +122,7 @@ export default function AddHobbyModal() {
                   placeholder="Hobby name"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                 />
                 <select
                   name="type"
@@ -132,7 +131,7 @@ export default function AddHobbyModal() {
                     setCustomType(e.target.value as HobbyType)
                     setSelectedPreset(null)
                   }}
-                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white"
                 >
                   <option value="boolean">Done / Not done</option>
                   <option value="counter">Counter (e.g. pages read)</option>
@@ -146,25 +145,25 @@ export default function AddHobbyModal() {
                       type="number"
                       min="1"
                       required
-                      placeholder="Daily goal (number)"
+                      placeholder="Daily goal"
                       value={formTarget}
                       onChange={(e) => setFormTarget(e.target.value)}
-                      className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="flex-1 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
                     <input
                       name="unit"
                       required
-                      placeholder={customType === 'time' ? 'min' : 'unit (e.g. ml)'}
+                      placeholder={customType === 'time' ? 'min' : 'unit'}
                       value={formUnit}
                       onChange={(e) => setFormUnit(e.target.value)}
-                      className="w-28 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-24 border border-slate-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
                   </div>
                 )}
                 <button
                   type="submit"
                   disabled={isPending}
-                  className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors"
                 >
                   {isPending ? 'Adding…' : 'Add hobby'}
                 </button>

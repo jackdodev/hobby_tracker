@@ -22,17 +22,17 @@ export default function MonthNav({ current }: Props) {
   })
 
   return (
-    <div className="flex items-center gap-4 mb-6">
+    <div className="flex items-center gap-3 mb-6">
       <button
         onClick={() => shift(-1)}
-        className="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100"
+        className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
       >
         ‹ Prev
       </button>
-      <span className="font-semibold text-lg">{label}</span>
+      <span className="font-semibold text-slate-800 flex-1 text-center">{label}</span>
       <button
         onClick={() => shift(1)}
-        className="px-3 py-1 rounded border border-gray-300 text-sm hover:bg-gray-100"
+        className="px-3 py-1.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-600 hover:bg-slate-50 hover:border-slate-300 transition-colors shadow-sm"
       >
         Next ›
       </button>

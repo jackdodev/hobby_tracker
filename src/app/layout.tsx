@@ -17,9 +17,9 @@ export default async function RootLayout({ children }: { children: React.ReactNo
 
   return (
     <html lang="en" className={`${geist.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col bg-white text-gray-900">
+      <body className="min-h-full flex flex-col bg-slate-50 text-slate-900">
         {userId && <Nav userId={userId} />}
-        <main className="flex-1 max-w-3xl w-full mx-auto px-4 py-8">
+        <main className="flex-1 max-w-2xl w-full mx-auto px-4 py-6 pb-24 md:py-8 md:pb-8">
           {children}
         </main>
       </body>

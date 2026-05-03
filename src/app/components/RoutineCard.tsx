@@ -50,27 +50,33 @@ export default function RoutineCard({ routine, hobbies, entries, today, streaks,
   const allDone = hobbies.length > 0 && doneCount === hobbies.length
 
   return (
-    <div className={`rounded-lg border overflow-hidden ${allDone ? 'border-green-300' : 'border-gray-200'}`}>
+    <div
+      className={`rounded-2xl shadow-sm border overflow-hidden transition-all ${
+        allDone ? 'border-emerald-200 shadow-emerald-100' : 'border-slate-200'
+      }`}
+    >
       <div
         onClick={() => setExpanded((v) => !v)}
-        className={`flex items-center gap-3 px-4 py-3 cursor-pointer select-none ${
-          allDone ? 'bg-green-50' : 'bg-white hover:bg-gray-50'
+        className={`flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none min-h-[56px] transition-colors ${
+          allDone ? 'bg-emerald-50' : 'bg-white hover:bg-slate-50'
         }`}
       >
-        <span className={`font-medium flex-1 ${allDone ? 'text-green-800' : 'text-gray-700'}`}>
+        <span className={`font-medium flex-1 text-sm ${allDone ? 'text-emerald-800' : 'text-slate-700'}`}>
           {routine.name}
         </span>
-        <span className="text-sm text-gray-500 shrink-0">{doneCount} / {hobbies.length}</span>
+        <span className={`text-xs font-medium shrink-0 tabular-nums ${allDone ? 'text-emerald-600' : 'text-slate-500'}`}>
+          {doneCount} / {hobbies.length}
+        </span>
         <StreakBadge streak={routineStreak} />
-        <span className={`text-xs ml-1 shrink-0 ${allDone ? 'text-green-500' : 'text-gray-400'}`}>
+        <span className={`text-[10px] ml-1 shrink-0 ${allDone ? 'text-emerald-400' : 'text-slate-300'}`}>
           {expanded ? '▲' : '▼'}
         </span>
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-100 bg-gray-50 p-2 flex flex-col gap-2">
+        <div className="border-t border-slate-100 bg-slate-50 p-3 flex flex-col gap-2">
           {hobbies.length === 0 ? (
-            <p className="text-sm text-gray-400 px-2 py-1">No active hobbies in this routine.</p>
+            <p className="text-sm text-slate-400 px-2 py-1">No active hobbies in this routine.</p>
           ) : (
             hobbies.map((hobby) => (
               <HobbyItem

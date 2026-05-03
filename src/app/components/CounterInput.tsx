@@ -28,29 +28,31 @@ export default function CounterInput({ hobbyId, hobbyName, date, value: initialV
 
   return (
     <div
-      className={`flex flex-col gap-2 w-full px-4 py-3 rounded-lg border transition-colors ${
-        done ? 'bg-green-50 border-green-300' : 'bg-white border-gray-200'
-      } ${isPending ? 'opacity-50' : ''}`}
+      className={`flex flex-col gap-2.5 w-full px-4 py-3.5 rounded-2xl shadow-sm border transition-all ${
+        done
+          ? 'bg-emerald-50 border-emerald-200 shadow-emerald-100'
+          : 'bg-white border-slate-200'
+      } ${isPending ? 'opacity-60' : ''}`}
     >
-      <div className="flex items-center gap-3">
-        <span className={`font-medium flex-1 ${done ? 'text-green-800' : 'text-gray-700'}`}>
+      <div className="flex items-center gap-3 min-h-[32px]">
+        <span className={`font-medium flex-1 text-sm ${done ? 'text-emerald-800' : 'text-slate-700'}`}>
           {hobbyName}
         </span>
-        <span className="text-sm text-gray-500 shrink-0">
+        <span className="text-xs text-slate-500 shrink-0 tabular-nums">
           {count} / {goal.target} {goal.unit}
         </span>
         <div className="flex items-center gap-1 shrink-0">
           <button
             onClick={() => adjust(-1)}
             disabled={count === 0 || isPending}
-            className="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 font-medium"
+            className="w-9 h-9 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-30 font-semibold text-lg flex items-center justify-center transition-colors"
           >
             −
           </button>
           <button
             onClick={() => adjust(1)}
             disabled={isPending}
-            className="w-8 h-8 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 font-medium"
+            className="w-9 h-9 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 font-semibold text-lg flex items-center justify-center transition-colors"
           >
             +
           </button>
@@ -58,9 +60,9 @@ export default function CounterInput({ hobbyId, hobbyName, date, value: initialV
         <StreakBadge streak={streak} />
       </div>
 
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
         <div
-          className="h-full bg-green-500 rounded-full transition-all"
+          className="h-full bg-emerald-500 rounded-full transition-all duration-300"
           style={{ width: `${pct}%` }}
         />
       </div>

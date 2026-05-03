@@ -57,7 +57,6 @@ export default async function TodayPage() {
 
   const formatted = new Date().toLocaleDateString('en-US', {
     weekday: 'long',
-    year: 'numeric',
     month: 'long',
     day: 'numeric',
   })
@@ -74,57 +73,83 @@ export default async function TodayPage() {
   const totalDone = standaloneDone + routinesDone
 
   const empty = allHobbies.length === 0 && routines.length === 0
+  const allDone = !empty && totalDone === totalItems
+  const progressPct = totalItems > 0 ? Math.round((totalDone / totalItems) * 100) : 0
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-1">Today&apos;s Achievement</h1>
-      <p className="text-gray-500 mb-6">{formatted}</p>
+      <h1 className="text-2xl font-bold text-slate-900 mb-0.5">Today</h1>
+      <p className="text-slate-400 text-sm mb-5">{formatted}</p>
 
       {empty ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500 mb-4">No hobbies added yet.</p>
+        <div className="text-center py-16">
+          <div className="text-5xl mb-4">🌱</div>
+          <p className="text-slate-700 font-medium mb-1">No hobbies yet</p>
+          <p className="text-slate-400 text-sm mb-6">Start building good habits today</p>
           <a
             href="/hobbies"
-            className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
           >
             Add your first hobby
           </a>
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {standaloneHobbies.map((hobby) => (
-            <li key={hobby.id}>
-              {renderHobby(hobby, entryMap.get(hobby.id), today, hobbyStreaks[hobby.id] ?? { current: 0, best: 0 })}
-            </li>
-          ))}
+        <>
+          {/* Daily progress bar */}
+          <div className="mb-5 p-4 bg-white rounded-2xl shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between mb-2.5">
+              <span className="text-sm font-medium text-slate-700">
+                {allDone ? '🎉 All done!' : `${totalDone} of ${totalItems} done`}
+              </span>
+              <span className="text-sm font-semibold text-slate-500 tabular-nums">{progressPct}%</span>
+            </div>
+            <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all duration-500 ${
+                  allDone ? 'bg-emerald-500' : 'bg-indigo-500'
+                }`}
+                style={{ width: `${progressPct}%` }}
+              />
+            </div>
+          </div>
 
-          {routines.map((routine) => {
-            const rHobbies = routine.hobbyIds
-              .map((id) => allHobbies.find((h) => h.id === id))
-              .filter((h): h is Hobby => h !== undefined)
-            const streaks: Record<string, StreakInfo> = Object.fromEntries(
-              rHobbies.map((h) => [h.id, hobbyStreaks[h.id] ?? { current: 0, best: 0 }])
-            )
-            return (
-              <li key={routine.id}>
-                <RoutineCard
-                  routine={routine}
-                  hobbies={rHobbies}
-                  entries={entries}
-                  today={today}
-                  streaks={streaks}
-                  routineStreak={routineStreaks[routine.id] ?? { current: 0, best: 0 }}
-                />
+          <ul className="flex flex-col gap-3">
+            {standaloneHobbies.map((hobby) => (
+              <li key={hobby.id}>
+                {renderHobby(hobby, entryMap.get(hobby.id), today, hobbyStreaks[hobby.id] ?? { current: 0, best: 0 })}
               </li>
-            )
-          })}
-        </ul>
-      )}
+            ))}
 
-      {!empty && (
-        <p className="mt-6 text-sm text-gray-400">
-          {totalDone} / {totalItems} completed today
-        </p>
+            {routines.length > 0 && standaloneHobbies.length > 0 && (
+              <li>
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest px-1 pt-1 pb-0.5">
+                  Routines
+                </p>
+              </li>
+            )}
+
+            {routines.map((routine) => {
+              const rHobbies = routine.hobbyIds
+                .map((id) => allHobbies.find((h) => h.id === id))
+                .filter((h): h is Hobby => h !== undefined)
+              const streaks: Record<string, StreakInfo> = Object.fromEntries(
+                rHobbies.map((h) => [h.id, hobbyStreaks[h.id] ?? { current: 0, best: 0 }])
+              )
+              return (
+                <li key={routine.id}>
+                  <RoutineCard
+                    routine={routine}
+                    hobbies={rHobbies}
+                    entries={entries}
+                    today={today}
+                    streaks={streaks}
+                    routineStreak={routineStreaks[routine.id] ?? { current: 0, best: 0 }}
+                  />
+                </li>
+              )
+            })}
+          </ul>
+        </>
       )}
     </div>
   )
