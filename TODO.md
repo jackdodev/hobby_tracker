@@ -94,6 +94,38 @@
 - [x] Update all pages (`/`, `/hobbies`, `/history`, `/stats`) — read `userId` cookie, pass to storage functions
 - [x] Add logout button to `Nav` — form action calls `logout` server action; shows current userId
 
+## Milestone 6: Real Authentication (Auth.js + Google OAuth)
+
+> Replaces the current mock auth (no-op password, cookie-only userId). Auth.js v5 (beta) with Google OAuth — user is identified by their Google account email, which becomes the KV namespace key.
+
+### Setup
+- [ ] Install `next-auth@beta`
+- [ ] Create `src/auth.ts` — configure Auth.js with Google provider; expose `auth`, `signIn`, `signOut`, `handlers`
+- [ ] Register Google OAuth app in Google Cloud Console → get `AUTH_GOOGLE_ID` + `AUTH_GOOGLE_SECRET`
+- [ ] Add env vars to Vercel + `.env.local`: `AUTH_SECRET` (random string), `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+
+### Middleware
+- [ ] Replace `src/middleware.ts` with Auth.js middleware — `export { auth as middleware } from '@/auth'`
+- [ ] Configure matcher to protect all routes except static assets and auth callback
+
+### Auth Pages & Actions
+- [ ] Remove `src/actions/auth.ts` — `login`, `signup`, `logout` replaced by Auth.js `signIn`/`signOut`
+- [ ] Remove `src/app/(auth)/login/page.tsx` and `signup/page.tsx` — replaced by Auth.js sign-in page
+- [ ] Create `src/app/(auth)/login/page.tsx` — custom sign-in page with "Sign in with Google" button calling `signIn('google')`
+- [ ] Keep `src/app/(auth)/layout.tsx` minimal layout (no nav) — reuse as-is
+
+### Session in Pages & Actions
+- [ ] Update all server components (`/`, `/hobbies`, `/history`, `/stats`, `/account`) — replace `cookies().get('userId')` with `(await auth()).session?.user?.email`
+- [ ] Update all server actions (`hobbies.ts`, `log.ts`, `routines.ts`) — same session read pattern
+- [ ] Add guard: redirect to `/login` if no session (middleware handles most cases, but belt-and-suspenders in actions)
+
+### UI Updates
+- [ ] Update `Nav.tsx` — use `session.user.image` for avatar photo; fall back to initials from `session.user.name` if no photo
+- [ ] Update `/account` page — show real name, email, profile photo from session; replace mock initials avatar
+
+### Known Migration Note
+- KV keys are currently `tracker:${typedUsername}` — with Auth.js they become `tracker:${googleEmail}`. Existing mock data will not carry over automatically. Since this is a personal app, starting fresh or doing a one-time manual key rename in KV is the simplest path.
+
 ## Known Issues
 - [ ] E2E tests reset `data/tracker.json` before each test — needs updating to reset the KV store instead (after Milestone 4 migration)
 

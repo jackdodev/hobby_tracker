@@ -4,12 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A personal daily hobby tracker — a simple web app to log and review hobby activities each day. It has five pages:
+A personal daily hobby tracker — a simple web app to log and review hobby activities each day. It has six pages:
 
+- **Today** (`/`): Check off which hobbies were completed today. Shows a daily progress bar, current and best streak per hobby.
 - **Manage Hobbies** (`/hobbies`): Add or remove hobbies. Changes here propagate to all other pages.
-- **Today's Achievement** (`/`): Check off which hobbies were completed today by clicking each item. Shows current and best streak per hobby.
 - **History** (`/history`): Monthly table showing every hobby's completion across each day of the month, with a monthly completion % summary column.
 - **Stats** (`/stats`): GitHub-style full-year activity heatmap showing daily hobby completion intensity.
+- **Account** (`/account`): User detail page. Currently shows avatar and username; planned for future profile settings.
 
 ## Tech Spec
 
@@ -17,6 +18,8 @@ A personal daily hobby tracker — a simple web app to log and review hobby acti
 - **Language**: TypeScript
 - **UI Library**: React 19
 - **Styling**: Tailwind CSS 4
+- **Icons**: `@heroicons/react` (24/outline + 24/solid)
+- **Auth**: mock cookie-based session today → planned migration to Auth.js v5 (`next-auth@beta`) with Google OAuth
 - **Storage**: Vercel KV (Upstash Redis) via `@vercel/kv`
 - **Unit Testing**: Vitest + React Testing Library
 - **E2E Testing**: Playwright
@@ -231,6 +234,50 @@ Fri  [█]  [░]  [ ]  [ ]  ...  [░]
 - Gives a long-term consistency view at a glance
 - Color scale is relative to total active hobbies at time of rendering (removed hobbies excluded from denominator)
 
+### 5. Account
+
+A personal stats dashboard for the logged-in user. Accessible via the circular avatar button in the nav (desktop top-right, mobile 5th tab).
+
+**Pages**
+- `/account` — user stats and logout
+
+**Layout**
+
+```
+[Avatar initials]
+username
+Tracking since {month year}
+
+[ Days tracked ]  [ Completions ]  [ Active hobbies ]
+
+Top Streaks
+  1. Meditation    🔥 12d   best 14d
+  2. Reading       🔥  7d   best  7d
+  ...
+
+[ Log out ]
+```
+
+**Flow**
+
+```
+[/account]
+  └─ Read active hobbies + all log entries
+  └─ Compute all-time summary:
+       └─ Days tracked = unique dates with any log entry
+       └─ Completions = entries where hobby is fully achieved
+       └─ Active hobbies = count of hobbies with removedAt === null
+       └─ Tracking since = earliest log entry date
+  └─ Compute streak per active hobby → sort by current streak desc
+  └─ Render avatar, summary cards, streak list, logout button
+```
+
+**Key Details**
+- Logout button lives here — removed from the nav to keep it clean
+- Completions counts goal-based entries where `value >= goal.target`; boolean entries always count
+- Streaks show top 5 active hobbies ranked by current streak (ties broken by best streak)
+- If no log entries yet, "tracking since" is omitted
+
 ## UI Design System
 
 ### Principles
@@ -368,6 +415,22 @@ type LogEntry = {
 - `data/tracker.json` is committed to the repo as the source of truth; seed it as `{ "hobbies": [], "logEntries": [] }`
 - Existing `boolean`-style hobbies (no `type` field) are treated as `type: 'boolean'` at read time for backwards compatibility
 
+## Authentication
+
+### Current (mock)
+- `src/middleware.ts` — redirects unauthenticated requests (no `userId` cookie) to `/login`; redirects logged-in users away from auth pages
+- `src/actions/auth.ts` — `login()` sets a `userId` cookie with whatever username is typed (no validation); `logout()` clears it
+- Auth pages live in `src/app/(auth)/` route group with a minimal no-nav layout
+- **No real security** — the password field is ignored; anyone who knows a userId string can access that user's data
+
+### Planned: Auth.js v5 + Google OAuth (Milestone 6)
+- Install `next-auth@beta`; create `src/auth.ts` exporting `auth`, `signIn`, `signOut`, `handlers`
+- Middleware becomes `export { auth as middleware } from '@/auth'`
+- Login page replaced with a "Sign in with Google" button
+- All pages and server actions read user identity from `(await auth()).session?.user?.email` instead of the `userId` cookie
+- KV namespace key changes from typed username → Google account email
+- Required env vars: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+
 ## Deployment Plan
 
 **Platform**: Vercel Hobby (Free)
@@ -400,9 +463,17 @@ Push to main
 ```
 src/
 ├── app/                  # App Router pages and layouts
-│   └── .../
-│       └── components/   # Page-specific components
-├── components/           # Shared components
+│   ├── account/          # /account — user detail page
+│   ├── history/          # /history — monthly table
+│   │   └── components/   # MonthNav
+│   ├── hobbies/          # /hobbies — manage hobbies
+│   │   └── components/   # HobbyRow, AddHobbyModal, AddRoutineModal, …
+│   ├── stats/            # /stats — yearly heatmap
+│   ├── components/       # Today-page components (ToggleButton, CounterInput, …)
+│   ├── layout.tsx
+│   ├── page.tsx          # / — today page
+│   └── globals.css
+├── components/           # Shared components (Nav)
 ├── actions/              # Server Actions
 ├── lib/
 │   ├── storage.ts        # All KV read/write logic (async)
