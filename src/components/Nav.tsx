@@ -18,7 +18,7 @@ import {
 const NAV_LINKS = [
   { href: '/', label: 'Today', Outline: HomeOutline, Solid: HomeSolid },
   { href: '/hobbies', label: 'Hobbies', Outline: ListOutline, Solid: ListSolid },
-  { href: '/history', label: 'History', Outline: CalendarOutline, Solid: CalendarSolid },
+  { href: '/record', label: 'Record', Outline: CalendarOutline, Solid: CalendarSolid },
   { href: '/stats', label: 'Stats', Outline: ChartOutline, Solid: ChartSolid },
 ]
 
