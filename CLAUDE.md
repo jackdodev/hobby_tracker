@@ -8,7 +8,7 @@ A personal daily hobby tracker — a simple web app to log and review hobby acti
 
 - **Today** (`/`): Check off which hobbies were completed today. Shows a daily progress bar, current and best streak per hobby.
 - **Manage Hobbies** (`/hobbies`): Add or remove hobbies. Changes here propagate to all other pages.
-- **History** (`/history`): Monthly table showing every hobby's completion across each day of the month, with a monthly completion % summary column.
+- **Record** (`/record`): Monthly table showing every hobby's completion across each day of the month, with a monthly completion % summary column.
 - **Stats** (`/stats`): GitHub-style full-year activity heatmap showing daily hobby completion intensity.
 - **Account** (`/account`): User detail page. Currently shows avatar and username; planned for future profile settings.
 
@@ -91,7 +91,7 @@ Example presets:
 
 ### 1. Manage Hobbies
 
-A page to add and remove the hobbies being tracked. Changes here immediately affect the Today and History pages.
+A page to add and remove the hobbies being tracked. Changes here immediately affect the Today and Record pages.
 
 **Pages**
 - `/hobbies` — manage the hobby list
@@ -157,13 +157,13 @@ The home page. Shows all active hobbies as a checklist for today. User clicks a 
 - No date navigation — this page is always today
 - Each hobby row shows its **current streak** (consecutive days ending today) and **best streak** (longest run ever)
 
-### 3. History
+### 3. Record
 
 A monthly table showing completion status for every hobby across every day of the selected month.
 
 **Pages**
-- `/history` — monthly tracker table (defaults to current month)
-- `/history?month=YYYY-MM` — specific month view
+- `/record` — monthly tracker table (defaults to current month)
+- `/record?month=YYYY-MM` — specific month view
 
 **Layout**
 
@@ -183,10 +183,10 @@ Journaling | ✓ | ✓ |   | ✓ | ... |   | 57%  |
 **Flow**
 
 ```
-[/history]
+[/record]
   └─ Determine selected month (default: current month)
-  └─ Read active hobbies from tracker.json
-  └─ Read all log entries for the selected month from tracker.json
+  └─ Read active hobbies from KV
+  └─ Read all log entries for the selected month from KV
   └─ Render table: for each hobby × day, look up entry and determine status:
        └─ boolean: entry present → full; absent → none
        └─ quantity/counter/time: value >= goal.target → full; value < target → partial; no entry → none
@@ -341,7 +341,7 @@ Top Streaks
 |-------|--------------------------|
 | Today (`/`) | `HomeIcon` |
 | Hobbies (`/hobbies`) | `ListBulletIcon` |
-| History (`/history`) | `CalendarDaysIcon` |
+| Record (`/record`) | `CalendarDaysIcon` |
 | Stats (`/stats`) | `ChartBarIcon` |
 
 ## Data Storage
@@ -417,19 +417,20 @@ type LogEntry = {
 
 ## Authentication
 
-### Current (mock)
-- `src/middleware.ts` — redirects unauthenticated requests (no `userId` cookie) to `/login`; redirects logged-in users away from auth pages
-- `src/actions/auth.ts` — `login()` sets a `userId` cookie with whatever username is typed (no validation); `logout()` clears it
-- Auth pages live in `src/app/(auth)/` route group with a minimal no-nav layout
-- **No real security** — the password field is ignored; anyone who knows a userId string can access that user's data
+### Current: Auth.js v5 + Google OAuth + Credentials
 
-### Planned: Auth.js v5 + Google OAuth (Milestone 6)
-- Install `next-auth@beta`; create `src/auth.ts` exporting `auth`, `signIn`, `signOut`, `handlers`
-- Middleware becomes `export { auth as middleware } from '@/auth'`
-- Login page replaced with a "Sign in with Google" button
-- All pages and server actions read user identity from `(await auth()).session?.user?.email` instead of the `userId` cookie
-- KV namespace key changes from typed username → Google account email
+- `src/auth.ts` — NextAuth config with two providers:
+  - **Google** — OAuth via Google Cloud Console; `profile.picture` is carried into `session.user.image` via JWT/session callbacks
+  - **Credentials** — accepts any non-empty username (no real password validation); creates a session with username as `id` and `email`
+- `src/middleware.ts` — `export { auth as middleware } from '@/auth'`; matcher protects all routes except `_next/static`, `_next/image`, `favicon.ico`, and `/api/auth`
+- `src/actions/auth.ts` — `logout()` calls `signOut({ redirectTo: '/login' })`
+- Auth pages live in `src/app/(auth)/` route group with minimal no-nav layout
+- `src/app/(auth)/login/page.tsx` — username/password form + "Sign in with Google" button; both redirect to `/` on success
+- User identity: `(await auth())?.user?.email` — Google login = Google account email; credentials login = typed username
+- KV namespace key: `tracker:${userId}` where `userId` is the email/username from the session
 - Required env vars: `AUTH_SECRET`, `AUTH_GOOGLE_ID`, `AUTH_GOOGLE_SECRET`
+- Nav shows Google profile photo if available, falls back to initials from `session.user.name`
+- Account page shows real name, email, and Google profile photo from session
 
 ## Deployment Plan
 
@@ -464,7 +465,7 @@ Push to main
 src/
 ├── app/                  # App Router pages and layouts
 │   ├── account/          # /account — user detail page
-│   ├── history/          # /history — monthly table
+│   ├── record/           # /record — monthly table
 │   │   └── components/   # MonthNav
 │   ├── hobbies/          # /hobbies — manage hobbies
 │   │   └── components/   # HobbyRow, AddHobbyModal, AddRoutineModal, …

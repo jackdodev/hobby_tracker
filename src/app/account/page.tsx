@@ -1,11 +1,13 @@
 export const dynamic = 'force-dynamic'
 
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import { getActiveHobbies, getHobbies, getAllLogEntries, computeStreak } from '@/lib/storage'
 import { logout } from '@/actions/auth'
 
-function getInitials(userId: string): string {
-  const name = userId.split('@')[0]
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
   return name.slice(0, 2).toUpperCase()
 }
 
@@ -19,11 +21,15 @@ function StatCard({ label, value }: { label: string; value: number }) {
 }
 
 export default async function AccountPage() {
-  const jar = await cookies()
-  const userId = jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
+
+  const displayName = session?.user?.name ?? userId
+  const userImage = session?.user?.image ?? null
+  const initials = getInitials(displayName)
 
   const today = new Date().toLocaleDateString('en-CA')
-  const initials = getInitials(userId)
 
   const [activeHobbies, allHobbies, allEntries] = await Promise.all([
     getActiveHobbies(userId),
@@ -63,11 +69,17 @@ export default async function AccountPage() {
     <div className="flex flex-col gap-6">
       {/* Avatar + username */}
       <div className="flex flex-col items-center pt-6 pb-2 gap-3">
-        <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-700 select-none">
-          {initials}
-        </div>
+        {userImage ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={userImage} alt={displayName} className="w-20 h-20 rounded-full object-cover" />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-indigo-100 flex items-center justify-center text-2xl font-bold text-indigo-700 select-none">
+            {initials}
+          </div>
+        )}
         <div className="text-center">
-          <p className="text-lg font-semibold text-slate-800">{userId}</p>
+          <p className="text-lg font-semibold text-slate-800">{displayName}</p>
+          <p className="text-xs text-slate-400">{userId}</p>
           {trackingSince && (
             <p className="text-xs text-slate-400 mt-0.5">Tracking since {trackingSince}</p>
           )}

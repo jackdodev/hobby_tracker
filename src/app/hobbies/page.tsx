@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import { getActiveHobbies, getActiveRoutines } from '@/lib/storage'
 import AddHobbyModal from './components/AddHobbyModal'
 import AddRoutineModal from './components/AddRoutineModal'
@@ -9,8 +10,9 @@ import RoutineRow from './components/RoutineRow'
 import type { Hobby } from '@/types'
 
 export default async function HobbiesPage() {
-  const jar = await cookies()
-  const userId = jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
 
   const allHobbies = await getActiveHobbies(userId)
   const routines = await getActiveRoutines(userId)

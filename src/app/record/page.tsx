@@ -1,4 +1,5 @@
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import { getHobbies, getAllLogEntries } from '@/lib/storage'
 import { streakFromDateSet, buildCompletionMap, isEntryComplete } from '@/lib/utils'
 
@@ -12,8 +13,9 @@ function formatMonth(yearMonth: string): string {
 }
 
 export default async function HistoryPage() {
-  const jar = await cookies()
-  const userId = jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
 
   const [allHobbies, allEntries] = await Promise.all([
     getHobbies(userId),

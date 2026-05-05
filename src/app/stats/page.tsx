@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import { getDailyCountMap, getActiveHobbies, getAllLogEntries } from '@/lib/storage'
 import { offsetDate, streakFromDateSet, buildCompletionMap } from '@/lib/utils'
 
@@ -84,8 +85,9 @@ function HeatmapGrid({ weeks, totalHobbies }: { weeks: Cell[][]; totalHobbies: n
 }
 
 export default async function StatsPage() {
-  const jar = await cookies()
-  const userId = jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
 
   const [dailyMap, activeHobbies, allEntries] = await Promise.all([
     getDailyCountMap(userId),

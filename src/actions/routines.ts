@@ -1,13 +1,16 @@
 'use server'
 
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 import { addHobby, addRoutine, removeRoutine } from '@/lib/storage'
 import type { HobbyType, HobbyGoal } from '@/types'
 
 async function getUserId(): Promise<string> {
-  const jar = await cookies()
-  return jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
+  return userId
 }
 
 export async function createRoutineWithHobbies(params: {

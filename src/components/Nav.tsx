@@ -22,16 +22,27 @@ const NAV_LINKS = [
   { href: '/stats', label: 'Stats', Outline: ChartOutline, Solid: ChartSolid },
 ]
 
-function getInitials(userId: string): string {
-  const name = userId.split('@')[0]
+function getInitials(name: string): string {
+  const parts = name.trim().split(/\s+/)
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase()
   return name.slice(0, 2).toUpperCase()
 }
 
-type Props = { userId: string }
+type Props = { userName: string; userImage: string | null }
 
-export default function Nav({ userId }: Props) {
+function Avatar({ userName, userImage, size }: Props & { size: 'sm' | 'lg' }) {
+  const dim = size === 'sm' ? 'w-8 h-8 text-xs' : 'w-6 h-6 text-[11px]'
+  if (userImage) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img src={userImage} alt={userName} className={`${dim} rounded-full object-cover`} />
+    )
+  }
+  return <span className={`${dim} rounded-full flex items-center justify-center font-bold`}>{getInitials(userName)}</span>
+}
+
+export default function Nav({ userName, userImage }: Props) {
   const pathname = usePathname()
-  const initials = getInitials(userId)
   const accountActive = pathname === '/account'
 
   return (
@@ -62,14 +73,14 @@ export default function Nav({ userId }: Props) {
 
           <Link
             href="/account"
-            title={userId}
-            className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
+            title={userName}
+            className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors overflow-hidden ${
               accountActive
-                ? 'bg-indigo-600 text-white'
-                : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-            }`}
+                ? 'ring-2 ring-indigo-600'
+                : 'ring-2 ring-transparent hover:ring-indigo-300'
+            } ${!userImage ? (accountActive ? 'bg-indigo-600 text-white' : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200') : ''}`}
           >
-            {initials}
+            <Avatar userName={userName} userImage={userImage} size="sm" />
           </Link>
         </div>
       </nav>
@@ -102,13 +113,11 @@ export default function Nav({ userId }: Props) {
             }`}
           >
             <span
-              className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold transition-colors ${
-                accountActive
-                  ? 'bg-indigo-600 text-white'
-                  : 'bg-slate-200 text-slate-500'
+              className={`overflow-hidden transition-colors ${
+                accountActive && !userImage ? 'bg-indigo-600 text-white' : (!userImage ? 'bg-slate-200 text-slate-500' : '')
               }`}
             >
-              {initials}
+              <Avatar userName={userName} userImage={userImage} size="lg" />
             </span>
             <span className="text-[11px] font-medium">Account</span>
           </Link>

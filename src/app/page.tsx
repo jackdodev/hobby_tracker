@@ -1,6 +1,7 @@
 export const dynamic = 'force-dynamic'
 
-import { cookies } from 'next/headers'
+import { auth } from '@/auth'
+import { redirect } from 'next/navigation'
 import {
   getActiveHobbies,
   getActiveRoutines,
@@ -36,8 +37,9 @@ function isHobbyDone(hobby: Hobby, entry: LogEntry | undefined): boolean {
 }
 
 export default async function TodayPage() {
-  const jar = await cookies()
-  const userId = jar.get('userId')?.value ?? ''
+  const session = await auth()
+  const userId = session?.user?.email
+  if (!userId) redirect('/login')
 
   const today = todayString()
   const allHobbies = await getActiveHobbies(userId)
