@@ -1,5 +1,5 @@
 import { createClient } from '@vercel/kv'
-import type { TrackerData, Hobby, HobbyType, HobbyGoal, LogEntry, Routine, StreakInfo } from '@/types'
+import type { TrackerData, Hobby, HobbyType, HobbyGoal, LogEntry, Routine, StreakInfo, UserRecord } from '@/types'
 
 const kv = createClient({
   url: process.env.hb_KV_REST_API_URL!,
@@ -172,6 +172,18 @@ export async function computeRoutineStreak(userId: string, routine: Routine, tod
   const routineDone = new Set([...allDates].filter((d) => hobbyDoneSets.every((s) => s.has(d))))
 
   return streakFromEntries(routineDone, today)
+}
+
+export async function createUser(email: string, username: string, passwordHash: string): Promise<void> {
+  const key = `user:${email}`
+  const existing = await kv.get<UserRecord>(key)
+  if (existing) throw new Error('Email already registered')
+  const record: UserRecord = { email, username, passwordHash, createdAt: new Date().toISOString() }
+  await kv.set(key, record)
+}
+
+export async function getUser(email: string): Promise<UserRecord | null> {
+  return kv.get<UserRecord>(`user:${email}`)
 }
 
 export async function getDailyCountMap(userId: string): Promise<Map<string, number>> {

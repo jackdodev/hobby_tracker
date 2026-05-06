@@ -1,19 +1,29 @@
 import NextAuth from 'next-auth'
 import Google from 'next-auth/providers/google'
 import Credentials from 'next-auth/providers/credentials'
+import bcrypt from 'bcryptjs'
+import { getUser } from '@/lib/storage'
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Google,
     Credentials({
       credentials: {
-        username: { label: 'Username', type: 'text' },
+        email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      authorize(credentials) {
-        const username = (credentials?.username as string)?.trim()
-        if (!username) return null
-        return { id: username, email: username, name: username, image: null }
+      async authorize(credentials) {
+        const email = (credentials?.email as string)?.trim().toLowerCase()
+        const password = credentials?.password as string
+        if (!email || !password) return null
+
+        const user = await getUser(email)
+        if (!user) return null
+
+        const valid = await bcrypt.compare(password, user.passwordHash)
+        if (!valid) return null
+
+        return { id: email, email, name: user.username, image: null }
       },
     }),
   ],

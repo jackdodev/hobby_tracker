@@ -38,3 +38,10 @@ export type TrackerData = {
   routines: Routine[]
   logEntries: LogEntry[]
 }
+
+export type UserRecord = {
+  email: string
+  username: string
+  passwordHash: string
+  createdAt: string
+}

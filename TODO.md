@@ -126,8 +126,87 @@
 ## Known Issues
 - [ ] E2E tests reset `data/tracker.json` before each test — needs updating to reset the KV store instead (after Milestone 4 migration)
 
+## Milestone 7: Real Username/Password Authentication ✓
+
+> Credentials provider now validates passwords against bcrypt hashes stored in Vercel KV. Users must sign up before they can log in.
+
+### Storage
+- [x] Add `bcryptjs` (+ `@types/bcryptjs`) for password hashing
+- [x] Define user record type: `{ username: string; passwordHash: string; createdAt: string }`
+- [x] Add KV storage functions in `src/lib/storage.ts`:
+  - `createUser(username, passwordHash)` — writes `user:${username}` key; throws if already exists
+  - `getUser(username)` — reads `user:${username}`; returns null if not found
+
+### Sign-up Flow
+- [x] Restore `src/app/(auth)/signup/page.tsx` — form with username + password + confirm password fields
+- [x] Add `signup` server action in `src/actions/auth.ts`:
+  - Validate: username non-empty, password ≥ 8 chars, passwords match, username not already taken
+  - Hash password with `bcryptjs`
+  - Call `createUser(username, hash)`
+  - Redirect to `/login?signup=success`
+- [x] Show success banner on login page when `?signup=success` is present
+- [x] Add "Sign up" link back to login page pointing to `/signup`
+
+### Sign-in Validation
+- [x] Update Credentials `authorize` in `src/auth.ts`:
+  - Look up `getUser(username)`
+  - If no user found → return null (Auth.js redirects to `/login?error=CredentialsSignin`)
+  - Compare submitted password against `passwordHash` with `bcryptjs.compare`
+  - If match → return `{ id: username, email: username, name: username }`; else → return null
+- [x] Update login page error message to say "Invalid username or password" for `CredentialsSignin` error
+
+### Notes
+- KV key format: `user:${username}` (separate namespace from `tracker:${userId}`)
+- Google OAuth users have no password record — they can only sign in via Google
+- Passwords are never stored in plaintext — only the bcrypt hash
+
+## Milestone 7.5: Email-based Auth + Separate Display Username ✓
+
+> Separate the login identifier (email) from the display name (username). Login uses email for both credentials and Google OAuth; the username is a human-readable display name shown throughout the app. This also lays the groundwork for a future "forgot password" flow.
+
+### Data Model
+
+- `UserRecord`: `{ email: string; username: string; passwordHash: string; createdAt: string }`
+- KV key: `user:${email}` (was `user:${username}`)
+- Tracker namespace: `tracker:${session.user.email}` — unchanged, consistent with Google OAuth
+- Session: `session.user.email` = email, `session.user.name` = display username
+
+### Storage
+- [x] Update `UserRecord` type: replace `username: string` (login id) with `email: string` + `username: string` (display)
+- [x] Update `createUser(email, username, passwordHash)` — key changes to `user:${email}`
+- [x] Update `getUser(email)` — look up by email
+
+### Sign-up Flow
+- [x] Update signup form: email field (top) + username field (display name) + password + confirm
+- [x] Update `signup` server action: validate email format, check uniqueness by email, store `UserRecord` with both email and username
+- [x] Update error codes: `email_required`, `invalid_email`, `email_taken` replace `username_required` / `username_taken`
+
+### Sign-in
+- [x] Update login form: label "Email" instead of "Username"; input `name="email"`
+- [x] Update `loginWithCredentials` action: pass `email` field instead of `username`
+- [x] Update Credentials provider in `src/auth.ts`: credentials field `email` instead of `username`; `authorize` looks up `getUser(email)`, returns `{ id: email, email, name: user.username }`
+
+### Notes
+- Google OAuth users get `session.user.name` from their Google profile — no `UserRecord` needed
+- Credentials users: `session.user.name` comes from `UserRecord.username` via the `authorize` return value
+- Nav and Account page already use `session.user.name` for display — no changes needed there
+
 ## Future Ideas
+
+### App Features
 - [ ] Year selector on Stats page (currently hardcoded to last 52 weeks)
 - [ ] Per-hobby stats page (streak history, calendar view for one hobby)
 - [ ] Export data as CSV
 - [ ] PWA / home screen shortcut for quick daily check-in
+
+### Achievements & Gamification
+- [ ] Define achievement types (streak milestones, total completions, first log, etc.) with point values
+- [ ] Compute and store earned achievements per user in KV (`achievements:${email}`)
+- [ ] Achievement badge display on Account page — unlocked vs. locked
+- [ ] Points total shown on Account page; leaderboard optional (future)
+
+### Auth & Security
+- [ ] **Welcome email** — send a transactional email on successful sign-up (Resend or SendGrid); include display name and a getting-started link
+- [ ] **Forgot password** — "Forgot password?" link on login page → email input → send a time-limited reset token (stored in KV as `reset:${token}`) → reset link redirects to a new-password form → bcrypt hash + clear token
+- [ ] **Stricter password rules** — enforce uppercase, lowercase, digit, and special character; show live strength indicator on signup form
+- [ ] **JWT hardening** — set explicit `maxAge` on the Auth.js session JWT; add `jti` (JWT ID) claim for token revocation; rotate secret via `AUTH_SECRET` versioning

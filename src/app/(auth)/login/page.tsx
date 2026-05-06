@@ -6,7 +6,7 @@ async function loginWithCredentials(formData: FormData) {
   'use server'
   try {
     await signIn('credentials', {
-      username: formData.get('username'),
+      email: formData.get('email'),
       password: formData.get('password'),
       redirectTo: '/',
     })
@@ -23,33 +23,40 @@ async function loginWithGoogle() {
   await signIn('google', { redirectTo: '/' })
 }
 
-type Props = { searchParams: Promise<{ error?: string }> }
+type Props = { searchParams: Promise<{ error?: string; signup?: string }> }
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { error } = await searchParams
+  const { error, signup } = await searchParams
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-200 w-full max-w-sm p-8">
       <h1 className="text-2xl font-bold mb-1">Hobby Tracker</h1>
       <p className="text-gray-500 text-sm mb-8">Track your daily habits.</p>
 
-      {error && (
-        <p className="mb-4 text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
-          Username is required to sign in.
+      {signup === 'success' && (
+        <p className="mb-4 text-sm text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2">
+          Account created! You can now log in.
         </p>
       )}
 
-      {/* Username / password form */}
+      {error && (
+        <p className="mb-4 text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
+          Invalid email or password.
+        </p>
+      )}
+
+      {/* Email / password form */}
       <form action={loginWithCredentials} className="flex flex-col gap-4">
         <div>
           <label className="block text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">
-            Username
+            Email
           </label>
           <input
-            name="username"
+            name="email"
+            type="email"
             required
             autoFocus
-            placeholder="Enter your username"
+            placeholder="you@example.com"
             className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
         </div>
@@ -106,6 +113,13 @@ export default async function LoginPage({ searchParams }: Props) {
           Sign in with Google
         </button>
       </form>
+
+      <p className="mt-6 text-center text-sm text-gray-500">
+        Don&apos;t have an account?{' '}
+        <a href="/signup" className="text-indigo-600 font-medium hover:underline">
+          Sign up
+        </a>
+      </p>
     </div>
   )
 }
