@@ -45,3 +45,21 @@ export type UserRecord = {
   passwordHash: string
   createdAt: string
 }
+
+export type AchievementDef = {
+  id: string
+  name: string
+  description: string
+  emoji: string
+  points: number
+}
+
+export type EarnedAchievement = {
+  id: string
+  earnedAt: string // ISO 8601
+}
+
+export type AchievementsData = {
+  earned: EarnedAchievement[]
+  totalPoints: number
+}

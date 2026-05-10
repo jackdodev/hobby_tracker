@@ -194,16 +194,16 @@
 ## Future Ideas
 
 ### App Features
-- [ ] Year selector on Stats page (currently hardcoded to last 52 weeks)
-- [ ] Per-hobby stats page (streak history, calendar view for one hobby)
-- [ ] Export data as CSV
-- [ ] PWA / home screen shortcut for quick daily check-in
+- [x] Year selector on Stats page (currently hardcoded to last 52 weeks)
+- [x] Per-hobby stats page (streak history, calendar view for one hobby)
+- [x] Export data as CSV
+- [x] PWA / home screen shortcut for quick daily check-in
 
 ### Achievements & Gamification
-- [ ] Define achievement types (streak milestones, total completions, first log, etc.) with point values
-- [ ] Compute and store earned achievements per user in KV (`achievements:${email}`)
-- [ ] Achievement badge display on Account page — unlocked vs. locked
-- [ ] Points total shown on Account page; leaderboard optional (future)
+- [x] Define achievement types (streak milestones, total completions, first log, etc.) with point values
+- [x] Compute and store earned achievements per user in KV (`achievements:${email}`)
+- [x] Achievement badge display on Account page — unlocked vs. locked
+- [x] Points total shown on Account page; leaderboard optional (future)
 
 ### Auth & Security
 - [ ] **Welcome email** — send a transactional email on successful sign-up (Resend or SendGrid); include display name and a getting-started link

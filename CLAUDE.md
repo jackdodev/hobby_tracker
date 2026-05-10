@@ -10,7 +10,7 @@ A personal daily hobby tracker — a simple web app to log and review hobby acti
 - **Manage Hobbies** (`/hobbies`): Add or remove hobbies. Changes here propagate to all other pages.
 - **Record** (`/record`): Monthly table showing every hobby's completion across each day of the month, with a monthly completion % summary column.
 - **Stats** (`/stats`): GitHub-style full-year activity heatmap showing daily hobby completion intensity.
-- **Account** (`/account`): User detail page. Currently shows avatar and username; planned for future profile settings.
+- **Account** (`/account`): User stats dashboard. Shows avatar, all-time stats, achievements with point totals, and top streaks.
 
 ## Tech Spec
 
@@ -247,8 +247,12 @@ A personal stats dashboard for the logged-in user. Accessible via the circular a
 [Avatar initials]
 username
 Tracking since {month year}
+⭐ 123 pts
 
 [ Days tracked ]  [ Completions ]  [ Active hobbies ]
+
+Achievements  3/13
+  [🌱 First Step]  [🔥 On a Roll]  [⚡ Week Warrior ·locked·]  ...
 
 Top Streaks
   1. Meditation    🔥 12d   best 14d
@@ -262,14 +266,14 @@ Top Streaks
 
 ```
 [/account]
-  └─ Read active hobbies + all log entries
+  └─ Read active hobbies + all log entries + achievements data
   └─ Compute all-time summary:
        └─ Days tracked = unique dates with any log entry
        └─ Completions = entries where hobby is fully achieved
        └─ Active hobbies = count of hobbies with removedAt === null
        └─ Tracking since = earliest log entry date
   └─ Compute streak per active hobby → sort by current streak desc
-  └─ Render avatar, summary cards, streak list, logout button
+  └─ Render avatar (+ points badge), summary cards, achievements grid, streak list, logout button
 ```
 
 **Key Details**
@@ -277,6 +281,43 @@ Top Streaks
 - Completions counts goal-based entries where `value >= goal.target`; boolean entries always count
 - Streaks show top 5 active hobbies ranked by current streak (ties broken by best streak)
 - If no log entries yet, "tracking since" is omitted
+- Points badge (⭐ N pts) shown below username; hidden if 0 points
+- Achievement grid shows all 13 achievements — earned ones bright, locked ones at 40% opacity
+
+## Achievements & Gamification
+
+Achievements are computed from tracker data on every log upsert and stored in KV under `achievements:${userId}`.
+
+**Key files**
+- `src/lib/achievements.ts` — `ACHIEVEMENT_DEFS` constant + `computeEarnedAchievementIds(data, today)` (pure)
+- `src/lib/storage.ts` — `getAchievementsData()`, `syncAchievements()` (KV ops)
+- `src/actions/log.ts` — calls `syncAchievements` after every `upsertLogEntry`
+
+**Achievement list** (13 total):
+
+| ID | Name | Description | Emoji | Points |
+|----|------|-------------|-------|--------|
+| `first_log` | First Step | Log your first hobby | 🌱 | 5 |
+| `streak_3` | On a Roll | 3-day streak on any hobby | 🔥 | 15 |
+| `streak_7` | Week Warrior | 7-day streak on any hobby | ⚡ | 30 |
+| `streak_14` | Fortnight Force | 14-day streak on any hobby | 💥 | 60 |
+| `streak_30` | Month Master | 30-day streak on any hobby | 🏆 | 100 |
+| `completions_10` | Getting Started | 10 total completions | 📈 | 20 |
+| `completions_50` | Dedicated | 50 total completions | 💪 | 50 |
+| `completions_100` | Century Club | 100 total completions | 💯 | 100 |
+| `completions_500` | Legend | 500 total completions | 🌟 | 250 |
+| `perfect_day` | Perfect Day | Complete all active hobbies in one day | ⭐ | 40 |
+| `days_7` | Week In | Log on 7 different days | 📅 | 20 |
+| `days_30` | Month In | Log on 30 different days | 📆 | 50 |
+| `hobby_variety` | Collector | Track 5 or more hobbies | 🎒 | 20 |
+
+**Max total points: 760**
+
+**Computation rules**
+- Streak achievements use best-ever streak (any logged entry counts, not just complete ones — consistent with `computeStreak`)
+- Completion achievements count entries where `value >= goal.target` (boolean = always counts)
+- `perfect_day`: checks if any day in history has complete entries for all *currently active* hobbies
+- `syncAchievements` preserves original `earnedAt` timestamps — never overwrites once set
 
 ## UI Design System
 

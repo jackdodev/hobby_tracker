@@ -1,5 +1,6 @@
 import { createClient } from '@vercel/kv'
-import type { TrackerData, Hobby, HobbyType, HobbyGoal, LogEntry, Routine, StreakInfo, UserRecord } from '@/types'
+import type { TrackerData, Hobby, HobbyType, HobbyGoal, LogEntry, Routine, StreakInfo, UserRecord, AchievementsData } from '@/types'
+import { ACHIEVEMENT_DEFS, computeEarnedAchievementIds } from '@/lib/achievements'
 
 const kv = createClient({
   url: process.env.hb_KV_REST_API_URL!,
@@ -193,4 +194,26 @@ export async function getDailyCountMap(userId: string): Promise<Map<string, numb
     map.set(entry.date, (map.get(entry.date) ?? 0) + 1)
   }
   return map
+}
+
+export async function getAchievementsData(userId: string): Promise<AchievementsData> {
+  return (await kv.get<AchievementsData>(`achievements:${userId}`)) ?? { earned: [], totalPoints: 0 }
+}
+
+export async function syncAchievements(userId: string): Promise<void> {
+  const data = await read(userId)
+  const today = new Date().toLocaleDateString('en-CA')
+  const earnedIds = computeEarnedAchievementIds(data, today)
+
+  const existing = (await kv.get<AchievementsData>(`achievements:${userId}`)) ?? { earned: [], totalPoints: 0 }
+  const existingMap = new Map(existing.earned.map((e) => [e.id, e.earnedAt]))
+
+  const now = new Date().toISOString()
+  const earned = earnedIds.map((id) => ({ id, earnedAt: existingMap.get(id) ?? now }))
+  const totalPoints = earned.reduce((sum, e) => {
+    const def = ACHIEVEMENT_DEFS.find((d) => d.id === e.id)
+    return sum + (def?.points ?? 0)
+  }, 0)
+
+  await kv.set(`achievements:${userId}`, { earned, totalPoints } satisfies AchievementsData)
 }

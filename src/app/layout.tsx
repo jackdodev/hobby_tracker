@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist } from 'next/font/google'
 import { auth } from '@/auth'
 import './globals.css'
@@ -9,6 +9,15 @@ const geist = Geist({ variable: '--font-geist-sans', subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Hobby Tracker',
   description: 'Track your daily hobby achievements',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'Hobbies',
+  },
+}
+
+export const viewport: Viewport = {
+  themeColor: '#6366f1',
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {

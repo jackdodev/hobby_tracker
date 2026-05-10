@@ -2,7 +2,8 @@ export const dynamic = 'force-dynamic'
 
 import { auth } from '@/auth'
 import { redirect } from 'next/navigation'
-import { getActiveHobbies, getHobbies, getAllLogEntries, computeStreak } from '@/lib/storage'
+import { getActiveHobbies, getHobbies, getAllLogEntries, computeStreak, getAchievementsData } from '@/lib/storage'
+import { ACHIEVEMENT_DEFS } from '@/lib/achievements'
 import { logout } from '@/actions/auth'
 
 function getInitials(name: string): string {
@@ -31,10 +32,11 @@ export default async function AccountPage() {
 
   const today = new Date().toLocaleDateString('en-CA')
 
-  const [activeHobbies, allHobbies, allEntries] = await Promise.all([
+  const [activeHobbies, allHobbies, allEntries, achievementsData] = await Promise.all([
     getActiveHobbies(userId),
     getHobbies(userId),
     getAllLogEntries(userId),
+    getAchievementsData(userId),
   ])
 
   // All-time summary
@@ -65,6 +67,8 @@ export default async function AccountPage() {
     .sort((a, b) => b.streak.current - a.streak.current || b.streak.best - a.streak.best)
     .slice(0, 5)
 
+  const earnedSet = new Set(achievementsData.earned.map((e) => e.id))
+
   return (
     <div className="flex flex-col gap-6">
       {/* Avatar + username */}
@@ -83,6 +87,11 @@ export default async function AccountPage() {
           {trackingSince && (
             <p className="text-xs text-slate-400 mt-0.5">Tracking since {trackingSince}</p>
           )}
+          {achievementsData.totalPoints > 0 && (
+            <span className="inline-flex items-center gap-1 mt-2 px-3 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700 text-xs font-semibold">
+              ⭐ {achievementsData.totalPoints} pts
+            </span>
+          )}
         </div>
       </div>
 
@@ -93,6 +102,42 @@ export default async function AccountPage() {
           <StatCard label="Days tracked" value={uniqueDays} />
           <StatCard label="Completions" value={totalCompletions} />
           <StatCard label="Active hobbies" value={activeHobbies.length} />
+        </div>
+      </div>
+
+      {/* Achievements */}
+      <div>
+        <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+          Achievements
+          {achievementsData.earned.length > 0 && (
+            <span className="ml-2 text-indigo-500 normal-case font-medium">
+              {achievementsData.earned.length}/{ACHIEVEMENT_DEFS.length}
+            </span>
+          )}
+        </h2>
+        <div className="grid grid-cols-3 gap-2 sm:grid-cols-4">
+          {ACHIEVEMENT_DEFS.map((def) => {
+            const earned = earnedSet.has(def.id)
+            return (
+              <div
+                key={def.id}
+                className={`flex flex-col items-center gap-1 p-3 rounded-xl border text-center transition-opacity ${
+                  earned
+                    ? 'bg-white border-slate-200 shadow-sm'
+                    : 'bg-slate-50 border-slate-100 opacity-40'
+                }`}
+              >
+                <span className="text-2xl leading-none">{def.emoji}</span>
+                <span className={`text-xs font-medium leading-tight mt-0.5 ${earned ? 'text-slate-800' : 'text-slate-400'}`}>
+                  {def.name}
+                </span>
+                <span className="text-[10px] text-slate-400 leading-tight">{def.description}</span>
+                <span className={`text-[10px] font-semibold mt-0.5 ${earned ? 'text-amber-500' : 'text-slate-300'}`}>
+                  {def.points} pts
+                </span>
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -121,8 +166,19 @@ export default async function AccountPage() {
         </div>
       )}
 
+      {/* Export */}
+      <div>
+        <a
+          href="/api/export"
+          download
+          className="flex items-center justify-center w-full px-4 py-2.5 border border-slate-200 text-slate-600 text-sm font-medium rounded-xl hover:bg-slate-50 transition-colors"
+        >
+          Export data as CSV
+        </a>
+      </div>
+
       {/* Log out */}
-      <div className="pt-2 pb-4">
+      <div className="pb-4">
         <form action={logout}>
           <button
             type="submit"
